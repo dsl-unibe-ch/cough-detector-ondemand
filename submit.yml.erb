@@ -1,0 +1,31 @@
+---
+batch_connect:
+  template: "basic"
+  # Expose the per-session `password` (set as a shell variable in
+  # before.sh.erb and written to connection.yml by the "basic" template) to
+  # view.html.erb. Only host and port are exposed by default; without this
+  # declaration, view.html.erb raises "undefined local variable or method
+  # `password' for ... TemplateBinding".
+  conn_params:
+    - password
+
+script:
+  # Sourced before / after the main script (template/script.sh.erb).
+  before_file: "template/before.sh.erb"
+  after_file: "template/after.sh"
+
+  native:
+    - "--account=<%= auto_accounts %>"
+    - "--job-name=dsl_cough_detector"
+    - "--partition=<%= partition %>"
+    - "--qos=<%= qos %>"
+    - "--gres=<%= gpu %><%= gpu_number %>"
+    - "--time=<%= time %>:00:00"
+    - "--mem-per-cpu=8g"
+    - "--cpus-per-task=4"
+<% unless reservation.blank? %>
+    - "--reservation=<%= reservation %>"
+<% end %>
+<% unless wckey.blank? %>
+    - "--wckey=<%= wckey %>"
+<% end %>

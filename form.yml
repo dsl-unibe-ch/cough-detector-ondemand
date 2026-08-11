@@ -1,0 +1,80 @@
+---
+cluster: "ubelix"
+
+form:
+  - auto_accounts
+  - partition
+  - qos
+  - time
+  - gpu
+  - gpu_number
+  - advanced_mode
+  - reservation
+  - wckey
+
+attributes:
+  partition:
+    widget: "select"
+    label: "SLURM Partition"
+    options:
+      - ["gpu", "gpu"]
+      - ["gpu-invest", "gpu-invest"]
+    value: "gpu"
+
+  qos:
+    widget: "select"
+    label: "Quality of Service (QoS)"
+    options:
+      - ["job_gratis", "job_gratis"]
+      - ["job_gpu", "job_gpu"]
+      - ["job_gpu_preemptable", "job_gpu_preemptable"]
+    value: "job_gratis"
+    help: >
+      Choose a QoS that matches your account and partition.
+
+  time:
+    widget: "number_field"
+    label: "Job Time (hours)"
+    min: 1
+    max: 24
+    step: 1
+    value: "4"
+    help: "Total walltime in hours. e.g. 4 means 4:00:00 hours."
+
+  gpu:
+    widget: "select"
+    label: "GPU Type"
+    options:
+      - ["rtx4090", "gpu:rtx4090:"]
+      - ["A100", "gpu:a100:"]
+      - ["H100", "gpu:h100:"]
+      - ["H200", "gpu:h200:"]
+    value: "rtx4090"
+    help: "Use A100/H100/H200 together with the 'job_gpu_preemptable' QoS."
+
+  gpu_number:
+    widget: "number_field"
+    label: "Number of GPU(s) requested"
+    min: 1
+    max: 1
+    step: 1
+    value: "1"
+    help: "Inference uses a single GPU."
+
+  wckey:
+    widget: "text_field"
+    label: "wckey"
+    help: 'Optional project identifier ("wckey") for accounting. Optional when using the gratis account.'
+
+  advanced_mode:
+    widget: "check_box"
+    label: "Advanced Mode"
+    help: "Show advanced Slurm options (e.g. reservation)"
+    html_options:
+      data:
+        hide-reservation-when-un-checked: true
+
+  reservation:
+    widget: "text_field"
+    label: "Reservation"
+    help: "(optional) Name of an active Slurm reservation to use for this session."

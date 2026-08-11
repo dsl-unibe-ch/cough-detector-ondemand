@@ -1,0 +1,14 @@
+# This repository contains only the Open OnDemand app definition.
+# Nothing is built here — no artifacts should ever appear.
+
+# Apptainer images and model checkpoints live on /storage, never in git.
+*.sif
+*.pt
+checkpoints/
+
+# Editor / OS noise
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*~

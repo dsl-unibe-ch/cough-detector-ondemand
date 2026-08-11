@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Apptainer is loaded via a module on the compute nodes.
+module load Apptainer 2>/dev/null || true
+command -v apptainer >/dev/null 2>&1 || {
+    echo "ERROR: apptainer not found on PATH (module load Apptainer failed)." >&2
+    exit 1
+}
+
+# --- Deployment paths -------------------------------------------------------
+# Defaults point at the shared production deployment. Override the env vars to
+# run a different build (e.g. a personal dev copy under ~/ondemand/dev — see
+# that sandbox's script.sh.erb, which repoints these at a local .sif).
+HOST_CD_DIR="${COUGH_DETECTOR_DIR:-/storage/research/dsl_shared/solutions/ondemand/cough_detector}"
+CD_CONTAINER="${COUGH_DETECTOR_SIF:-$HOST_CD_DIR/container/cough_detector.sif}"
+HOST_MODELS_DIR="${COUGH_MODELS_HOST_DIR:-$HOST_CD_DIR/container/checkpoints}"
+
+[ -f "$CD_CONTAINER" ]    || { echo "ERROR: Apptainer image not found: $CD_CONTAINER" >&2; exit 1; }
+[ -d "$HOST_MODELS_DIR" ] || { echo "ERROR: Models directory not found: $HOST_MODELS_DIR" >&2; exit 1; }
+
+CD_PORT="${SERVER_PORT:-8501}"
+BASEURLPATH="${SERVER_BASEURLPATH:-}"
+
+# Per-session auth token set by before.sh.erb. Optional: unset disables the
+# gate (core/auth.py is a no-op). Build apptainer env args conditionally so
+# `set -u` stays happy.
+CD_TOKEN="${COUGH_APP_TOKEN:-}"
+
+# Keep the host Python environment from leaking into the container.
+unset PYTHONPATH PYTHONHOME
+export PYTHONNOUSERSITE=1
+
+echo "Starting Equine Cough Detector on port ${CD_PORT}..."
+echo "Image:  $CD_CONTAINER"
+echo "Models: $HOST_MODELS_DIR (bind-mounted read-only at /models)"
+
+# --bind /storage:/storage          → the app can read the audio in the working
+#                                     directory the user picks AND write the CSV/
+#                                     PDF reports back next to it (anywhere under
+#                                     /storage). Without this the workflow fails.
+# --bind <checkpoints>:/models:ro   → COUGH_MODELS_DIR=/models inside the image
+#                                     auto-detects bg_model/ and cough_model/.
+bind_args=(--bind /storage:/storage --bind "$HOST_MODELS_DIR:/models:ro")
+env_args=()
+if [ -n "$CD_TOKEN" ]; then
+    env_args+=(--env "COUGH_APP_TOKEN=$CD_TOKEN")
+fi
+
+apptainer exec \
+    --nv \
+    "${bind_args[@]}" \
+    "${env_args[@]}" \
+    "$CD_CONTAINER" \
+    cd_app \
+        --server.address=0.0.0.0 \
+        --server.port="$CD_PORT" \
+        --server.baseUrlPath="$BASEURLPATH" \
+        --server.headless=true \
+        --server.maxUploadSize=10000 \
+        --browser.serverAddress=ondemand.hpc.unibe.ch \
+        --browser.gatherUsageStats=false

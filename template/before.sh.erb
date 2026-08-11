@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+# Make the `module` function available inside the non-interactive job shell so
+# the main script (script.sh.erb) can `module load Apptainer`.
+[[ $(type -t module) == "function" ]] && export -f module
+
+# Pick a free port. `host` and `find_port` are provided by the batch_connect
+# "basic" template.
+port=$(find_port)
+export SERVER_PORT="$port"
+
+# --- Per-session password ----------------------------------------------------
+# Ubelix compute nodes are shared and the cluster network isn't firewalled
+# between nodes, so the bound port is reachable by other users on the cluster.
+# Generate a random password per job; the app (core/auth.py) requires it before
+# any page renders. The `password` shell variable is written to connection.yml
+# by the "basic" template; submit.yml.erb lists it under `conn_params` so
+# view.html.erb can reference it (only host/port are exposed by default).
+password="$(openssl rand -base64 32 | tr -dc 'A-Za-z0-9' | head -c 16)"
+export COUGH_APP_TOKEN="$password"
+
+export SERVER_BASEURLPATH="/node/${host}/${port}/"

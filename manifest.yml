@@ -1,0 +1,6 @@
+---
+name: "Equine Cough Detector"
+category: "Data Science Lab Services"
+subcategory: "Audio Analysis"
+description: "Detect equine cough events in audio recordings using dual-model CNN inference (background gate + cough classifier). Batch-process a directory of recordings and get per-file and per-folder PDF reports. Provided by DSL. For help, contact DSL (support.dsl@unibe.ch)."
+role: batch_connect

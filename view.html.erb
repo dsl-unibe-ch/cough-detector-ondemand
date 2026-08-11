@@ -1,0 +1,39 @@
+<form action="/node/<%= host %>/<%= port %>/" method="get" target="_blank">
+  <p>Your Equine Cough Detector session is ready. Copy the session password,
+     then connect — the app will ask for it.</p>
+
+  <p><strong>Session password:</strong></p>
+  <div class="input-group" style="max-width: 320px; margin-bottom: 16px;">
+    <input type="password" class="form-control" value="<%= password %>" readonly
+           style="background-color:#fff; cursor:text;">
+    <span class="input-group-btn">
+      <button class="btn btn-default" type="button"
+              onclick="copyCdPassword(this, '<%= password %>')"
+              title="Copy to clipboard">
+        <i class="fa fa-clipboard"></i> Copy
+      </button>
+    </span>
+  </div>
+
+  <button class="btn btn-primary" type="submit">
+    <i class="fa fa-stethoscope"></i> Connect to Equine Cough Detector
+  </button>
+</form>
+
+<script>
+function copyCdPassword(btn, text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text);
+  } else {
+    var tmp = document.createElement("input");
+    tmp.value = text;
+    document.body.appendChild(tmp);
+    tmp.select();
+    document.execCommand("copy");
+    document.body.removeChild(tmp);
+  }
+  var orig = btn.innerHTML;
+  btn.innerHTML = '<i class="fa fa-check" style="color:green;"></i> Copied!';
+  setTimeout(function () { btn.innerHTML = orig; }, 2000);
+}
+</script>
