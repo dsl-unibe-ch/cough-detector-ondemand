@@ -19,7 +19,9 @@ script:
     - "--job-name=dsl_cough_detector"
     - "--partition=<%= partition %>"
     - "--qos=<%= qos %>"
+<% if partition.to_s.start_with?("gpu") %>
     - "--gres=<%= gpu %><%= gpu_number %>"
+<% end %>
     - "--time=<%= time %>:00:00"
     - "--mem-per-cpu=8g"
     - "--cpus-per-task=4"

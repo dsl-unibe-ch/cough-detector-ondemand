@@ -19,7 +19,16 @@ attributes:
     options:
       - ["gpu", "gpu"]
       - ["gpu-invest", "gpu-invest"]
+      - [
+          "epyc2 (CPU only)", "epyc2",
+          data-hide-gpu: true,
+          data-hide-gpu-number: true,
+          data-set-qos: "job_gratis"
+        ]
     value: "gpu"
+    help: >
+      epyc2 runs without a GPU (e.g. for browsing, annotating or ingesting).
+      Inference on a CPU is much slower.
 
   qos:
     widget: "select"
